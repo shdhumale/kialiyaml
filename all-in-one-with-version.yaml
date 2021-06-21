@@ -1,0 +1,171 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: mysiddhuweb-gateway
+  namespace: springboot-application
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "mysiddhuweb.example.com"
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: mysiddhuweb-vs
+  namespace: springboot-application
+spec:
+  hosts:
+  - "mysiddhuweb.example.com"
+  gateways:
+  - mysiddhuweb-gateway
+  http:
+  - route:
+      - destination:
+          host: siddhuconsumer
+          port:
+            number: 8090
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-docker-producer-v1
+  namespace: springboot-application
+  labels:
+   app: springboot-docker-producer-v1
+   version: v1
+spec:
+  selector:
+    matchLabels:
+      component: springboot-docker-producer-v1
+      version: v1
+  template:
+    metadata:
+      labels:
+        component: springboot-docker-producer-v1
+        version: v1
+    spec:
+      containers:
+      - name: springboot-docker-producer-v1
+        image: shdhumale/springboot-docker-producer:latest
+        env:
+        - name: discovery.type
+          value: single-node
+        ports:
+        - containerPort: 8091
+          name: http
+          protocol: TCP      
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: siddhuproducer
+  namespace: springboot-application
+  labels:
+    service: springboot-docker-producer-v1
+spec:
+  type: NodePort
+  selector:
+    component: springboot-docker-producer-v1
+  ports:
+  - name: http
+    port: 8091
+    targetPort: 8091
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-docker-producer-v2
+  namespace: springboot-application
+  labels:
+   app: springboot-docker-producer-v2
+   version: v2
+spec:
+  selector:
+    matchLabels:
+      component: springboot-docker-producer-v2
+      version: v2
+  template:
+    metadata:
+      labels:
+        component: springboot-docker-producer-v2
+        version: v2
+    spec:
+      containers:
+      - name: springboot-docker-producer-v2
+        image: shdhumale/springboot-docker-producer:latest
+        env:
+        - name: discovery.type
+          value: single-node
+        ports:
+        - containerPort: 8091
+          name: http
+          protocol: TCP      
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: siddhuproducer
+  namespace: springboot-application
+  labels:
+    service: springboot-docker-producer-v2
+spec:
+  type: NodePort
+  selector:
+    component: springboot-docker-producer-v2
+  ports:
+  - name: http
+    port: 8091
+    targetPort: 8091
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-docker-consumer
+  namespace: springboot-application
+spec:
+  selector:
+    matchLabels:
+      component: springboot-docker-consumer
+  template:
+    metadata:
+      labels:
+        component: springboot-docker-consumer
+    spec:
+      containers:
+      - name: springboot-docker-consumer
+        image: shdhumale/springboot-docker-consumer:latest
+        env:
+        - name: discovery.type
+          value: single-node
+        ports:
+        - containerPort: 8090
+          name: http
+          protocol: TCP      
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: siddhuconsumer
+  namespace: springboot-application
+  labels:
+    service: springboot-docker-consumer
+spec:
+  type: NodePort
+  selector:
+    component: springboot-docker-consumer
+  ports:
+  - name: http
+    port: 8090
+    targetPort: 8090	
