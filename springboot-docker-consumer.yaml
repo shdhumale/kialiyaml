@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: springboot-docker-consumer
   namespace: springboot-application
+  labels:
+   app: springboot-docker-consumer  
 spec:
   selector:
     matchLabels:

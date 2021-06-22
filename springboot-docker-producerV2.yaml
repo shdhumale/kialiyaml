@@ -4,21 +4,21 @@ metadata:
   name: springboot-docker-producer-v2
   namespace: springboot-application
   labels:
-   app: springboot-docker-producer-v2
+   app: siddhuproducer
    version: v2
 spec:
   selector:
     matchLabels:
-      component: springboot-docker-producer-v2
+      component: siddhuproducer
       version: v2
   template:
     metadata:
       labels:
-        component: springboot-docker-producer-v2
+        component: siddhuproducer
         version: v2
     spec:
       containers:
-      - name: springboot-docker-producer-v2
+      - name: siddhuproducer
         image: shdhumale/springboot-docker-producer:latest
         env:
         - name: discovery.type
@@ -26,21 +26,4 @@ spec:
         ports:
         - containerPort: 8091
           name: http
-          protocol: TCP      
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: siddhuproducer
-  namespace: springboot-application
-  labels:
-    service: springboot-docker-producer-v2
-spec:
-  type: NodePort
-  selector:
-    component: springboot-docker-producer-v2
-  ports:
-  - name: http
-    port: 8091
-    targetPort: 8091
+          protocol: TCP
