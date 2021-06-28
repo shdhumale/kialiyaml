@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: mysiddhuweb-gateway-service-disable-mtls
+spec:
+  host: siddhuconsumer
+  trafficPolicy:
+    tls:
+      mode: DISABLE
